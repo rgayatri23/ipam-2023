@@ -9,9 +9,9 @@ using namespace std::chrono;
 
 __global__ void kernel(int N, int *a, int *b, int *c)
 {
-    const int index = blockIdx.x * blockDim.x + threadIdx.x; 
-    if(index < N)
-        c[index] = a[index] + b[index];
+    const int i = blockIdx.x * blockDim.x + threadIdx.x; 
+    if(i < N)
+        c[i] = a[i] * b[i];
 }
 
 int main(int argc, char **argv) {
@@ -37,18 +37,19 @@ int main(int argc, char **argv) {
 
     cudaMemcpy(d_a, a, N * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, b, N * sizeof(int), cudaMemcpyHostToDevice);
+    cudaDeviceSynchronize();
 
     // do work
     const int threads = 32;
     const int blocks = N/threads + 1;
     kernel<<<blocks,threads>>> (N, d_a, d_b, d_c);
-
     cudaDeviceSynchronize();
     
     cudaMemcpy(c, d_c, N * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
 
     for (int i = 0; i < N; i++) 
-        printf("c[%d] = %d\n",i,c[i]);
+        printf("c[%d] = %d \t - expected %d\n",i,c[i],(i+1)*(i+2));
 
     // cleanup
     delete[] a;
