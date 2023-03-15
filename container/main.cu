@@ -7,11 +7,6 @@
 
 using namespace std::chrono;
 
-void random_ints(int *a, int N) {
-    int i;
-    for (i = 0; i < N; ++i) a[i] = rand();
-}
-
 __global__ void kernel(int N, int *a, int *b, int *c)
 {
     const int index = blockIdx.x * blockDim.x + threadIdx.x; 
@@ -29,8 +24,11 @@ int main(int argc, char **argv) {
     int *c = new int[N];
 
     // initialize inputs
-    random_ints(a, N);
-    random_ints(b, N);
+    for(int i = 0; i < N; ++i)
+    {
+        a[i] = i+1;
+        b[i] = i+2;
+    }
 
     int *d_a, *d_b, *d_c;
     cudaMalloc(&d_a, N * sizeof(int));
