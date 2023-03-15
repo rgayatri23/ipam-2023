@@ -45,6 +45,10 @@ int main(int argc, char **argv) {
     const int blocks = N/threads + 1;
     kernel<<<blocks,threads>>> (N, d_a, d_b, d_c);
 
+    cudaDeviceSynchronize();
+    
+    cudaMemcpy(c, d_c, N * sizeof(int), cudaMemcpyDeviceToHost);
+
     for (int i = 0; i < N; i++) 
         printf("c[%d] = %d\n",i,c[i]);
 
